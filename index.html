@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Clears — play the day</title>
+  <meta name="description" content="Gamified ADHD task manager. Everyday tasks become quests with XP, streaks, soundtrack, and gift-card loot." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --pink: #ffd6e8;
+      --pink-deep: #e8a0b8;
+      --lavender: #ddd6ff;
+      --violet: #6d5cae;
+      --rose: #c45c7c;
+      --cream: #fff7fb;
+      --ink: #3a2438;
+      --mute: #7a6576;
+      --card: rgba(255, 255, 255, 0.72);
+      --line: rgba(58, 36, 56, 0.1);
+      --shadow: 0 18px 50px rgba(109, 92, 174, 0.16);
+      --ok: #3d8b74;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: Nunito, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1000px 600px at -10% -10%, var(--pink), transparent 55%),
+        radial-gradient(900px 500px at 110% 0%, var(--lavender), transparent 50%),
+        radial-gradient(700px 400px at 50% 110%, #f7d9ff, transparent 45%),
+        var(--cream);
+    }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    h1, h2, h3 { font-family: Fraunces, serif; font-weight: 650; margin: 0; }
+    p { margin: 0; }
+    .app { width: min(430px, 100%); margin: 0 auto; min-height: 100vh; padding: 18px 16px 108px; position: relative; }
+    .orb {
+      position: absolute; border-radius: 50%; filter: blur(2px); pointer-events: none; opacity: 0.55;
+    }
+    .top {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px;
+    }
+    .brand-kicker { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--violet); font-weight: 800; }
+    .brand h1 { font-size: 34px; line-height: 1; }
+    .brand p { color: var(--mute); margin-top: 6px; font-size: 14px; }
+    .pills { display: flex; gap: 8px; }
+    .stat {
+      background: var(--card); backdrop-filter: blur(16px); border: 1px solid var(--line);
+      border-radius: 18px; padding: 8px 12px; text-align: right; box-shadow: var(--shadow);
+    }
+    .stat b { display: block; font-size: 18px; }
+    .stat span { font-size: 11px; color: var(--mute); font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+    .card {
+      background: var(--card); border: 1px solid var(--line); border-radius: 24px;
+      padding: 16px; box-shadow: var(--shadow); backdrop-filter: blur(18px);
+    }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip, .btn, .tab {
+      border: 1px solid var(--line); background: rgba(255,255,255,0.55); border-radius: 999px;
+      min-height: 44px; padding: 0 14px; cursor: pointer;
+    }
+    .chip.active, .btn.primary {
+      background: linear-gradient(135deg, #f4b8cc, #cbb8f4); border-color: transparent; font-weight: 800;
+    }
+    .btn.ghost { background: transparent; }
+    .btn.wide { width: 100%; border-radius: 16px; font-weight: 800; }
+    .btn.good { background: #d8f3ea; border-color: transparent; color: var(--ok); font-weight: 800; }
+    .section { margin-top: 14px; }
+    .quest {
+      display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--line);
+    }
+    .quest:last-child { border-bottom: 0; padding-bottom: 0; }
+    .tag { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--rose); }
+    .muted { color: var(--mute); font-size: 13px; }
+    .xpbar { height: 8px; background: rgba(255,255,255,0.7); border-radius: 99px; overflow: hidden; margin-top: 10px; }
+    .xpbar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #f3a7c1, #a994e8); }
+    .nav {
+      position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
+      width: min(400px, calc(100% - 24px)); display: grid; grid-template-columns: repeat(5, 1fr);
+      background: rgba(255,255,255,0.86); backdrop-filter: blur(18px); border: 1px solid var(--line);
+      border-radius: 22px; padding: 6px; box-shadow: var(--shadow); z-index: 5;
+    }
+    .tab { min-height: 52px; border: 0; background: transparent; border-radius: 16px; font-size: 11px; font-weight: 800; }
+    .tab.active { background: linear-gradient(180deg, #ffe4ef, #e8e0ff); }
+    .hero { font-size: 22px; margin-bottom: 8px; }
+    .first { font-size: 18px; line-height: 1.35; }
+    .loot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .loot {
+      border: 1px solid var(--line); border-radius: 18px; padding: 12px; background: rgba(255,255,255,0.65); text-align: left;
+    }
+    .loot b { display: block; font-size: 15px; }
+    .field { width: 100%; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; background: #fff; margin-top: 8px; }
+    .viz {
+      height: 54px; display: flex; align-items: flex-end; gap: 4px; margin: 12px 0 4px;
+    }
+    .viz span {
+      flex: 1; background: linear-gradient(180deg, #f4b4cc, #b7a6f0); border-radius: 99px 99px 6px 6px; height: 18%;
+    }
+    .playing .viz span { animation: eq 1s ease-in-out infinite; }
+    .playing .viz span:nth-child(2n) { animation-delay: .15s; }
+    .playing .viz span:nth-child(3n) { animation-delay: .28s; }
+    @keyframes eq {
+      0%, 100% { height: 18%; }
+      50% { height: 92%; }
+    }
+    .toast {
+      position: fixed; left: 50%; top: 16px; transform: translateX(-50%);
+      background: var(--ink); color: #fff; padding: 10px 14px; border-radius: 999px;
+      font-size: 13px; font-weight: 700; opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 9;
+    }
+    .toast.show { opacity: 1; }
+    .hidden { display: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .playing .viz span { animation: none; height: 55%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toast" id="toast"></div>
+  <main class="app">
+    <header class="top">
+      <div class="brand">
+        <div class="brand-kicker">Daily living RPG</div>
+        <h1>Clears</h1>
+        <p>Less guilt. More clears.</p>
+      </div>
+      <div class="pills">
+        <div class="stat"><b id="xpStat">0</b><span>XP</span></div>
+        <div class="stat"><b id="coinStat">0</b><span>Loot</span></div>
+      </div>
+    </header>
+
+    <section id="view-today">
+      <div class="card">
+        <h2 class="hero" id="greeting">Play the day you already have.</h2>
+        <p class="muted" id="streakLine">Start one tiny quest. The boss fight is beginning, not finishing.</p>
+        <div class="xpbar" aria-hidden="true"><i id="xpFill"></i></div>
+        <div class="row section">
+          <button class="chip" data-mood="foggy">Foggy</button>
+          <button class="chip" data-mood="steady">Steady</button>
+          <button class="chip" data-mood="charged">Charged</button>
+        </div>
+        <div class="row section">
+          <button class="chip" data-energy="low">Low energy</button>
+          <button class="chip" data-energy="mid">Mid</button>
+          <button class="chip" data-energy="high">High</button>
+        </div>
+      </div>
+      <div class="card section">
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <h2>Today’s map</h2>
+          <button class="btn" id="addBtn">+ Quest</button>
+        </div>
+        <p class="muted" style="margin-top:6px">Cooking, cleaning, self-care, admin. Pick one. Tiny is allowed.</p>
+        <div id="questList"></div>
+      </div>
+      <button class="btn wide section" id="frozenBtn">I’m frozen — help me start</button>
+    </section>
+
+    <section id="view-focus" class="hidden">
+      <div class="card">
+        <p class="tag" id="focusTag">Quest</p>
+        <h2 class="hero" id="focusTitle">Quest</h2>
+        <p class="muted" id="focusMeta"></p>
+        <p style="margin:14px 0 6px;font-weight:800">First step</p>
+        <p class="first" id="focusStep"></p>
+        <div class="row section">
+          <button class="chip" data-timer="5">5 min</button>
+          <button class="chip" data-timer="10">10 min</button>
+          <button class="chip" data-timer="15">15 min</button>
+        </div>
+        <p class="muted" id="timerLabel">No timer. Start whenever.</p>
+        <div class="row section">
+          <button class="btn primary" id="startTiny">I started</button>
+          <button class="btn good" id="clearQuest">Clear it</button>
+        </div>
+        <button class="btn wide ghost section" id="pauseQuest">Pause without guilt</button>
+      </div>
+    </section>
+
+    <section id="view-sound" class="hidden">
+      <div class="card" id="soundCard">
+        <h2>Soundtrack</h2>
+        <p class="muted" style="margin-top:6px">Match the biome and the state you are in. Boost to launch. Calm to stay.</p>
+        <div class="viz" id="viz"></div>
+        <p id="nowPlaying">Quiet map. Press play when you are ready.</p>
+        <div class="row section">
+          <button class="chip" data-track="calm">Calm</button>
+          <button class="chip" data-track="boost">Boost</button>
+        </div>
+        <button class="btn wide primary section" id="playBtn">Play built-in mix</button>
+        <div class="row section">
+          <button class="btn" data-connect="spotify">Connect Spotify</button>
+          <button class="btn" data-connect="apple">Apple Music</button>
+        </div>
+        <p class="muted" id="connectNote">Demo connections only. The built-in mix actually plays.</p>
+      </div>
+    </section>
+
+    <section id="view-loot" class="hidden">
+      <div class="card">
+        <h2>Real loot</h2>
+        <p class="muted" style="margin-top:6px">Not badges. Gift cards from the coins you clear. Demo redemption only.</p>
+        <p style="margin-top:10px"><b id="lootBank">0 coins</b></p>
+      </div>
+      <div class="loot-grid section" id="lootGrid"></div>
+      <div class="card section" id="lootLog"></div>
+    </section>
+
+    <section id="view-guide" class="hidden">
+      <div class="card">
+        <h2>If you are frozen</h2>
+        <p class="first" style="margin-top:8px" id="guideLine">You do not have to finish. You have to begin.</p>
+        <button class="btn wide primary section" id="guideStart">Give me the tiniest quest</button>
+      </div>
+      <div class="card section">
+        <h2>How Clears plays</h2>
+        <p class="muted" style="margin-top:8px">Everyday tasks become missions. A first step is a real clear. Soundtrack helps you launch. XP becomes gift-card loot. A paused streak is not a failure.</p>
+      </div>
+      <div class="card section">
+        <h2>Add a quest</h2>
+        <input class="field" id="newTitle" placeholder="Name the quest" />
+        <select class="field" id="newCat">
+          <option value="cooking">Cooking — Kitchen biome</option>
+          <option value="cleaning">Cleaning — Nest biome</option>
+          <option value="self-care">Self-care — Body biome</option>
+          <option value="life-admin">Life admin — Paperwork biome</option>
+        </select>
+        <input class="field" id="newStep" placeholder="First step only" />
+        <button class="btn wide primary section" id="saveQuest">Save to today</button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="nav" aria-label="Main">
+    <button class="tab active" data-view="today">Today</button>
+    <button class="tab" data-view="focus">Focus</button>
+    <button class="tab" data-view="sound">Sound</button>
+    <button class="tab" data-view="loot">Loot</button>
+    <button class="tab" data-view="guide">Guide</button>
+  </nav>
+
+  <script>
+    const KEY = "clears-save-v1";
+    const CATS = {
+      cooking: { label: "Cooking", biome: "Kitchen" },
+      cleaning: { label: "Cleaning", biome: "Nest" },
+      "self-care": { label: "Self-care", biome: "Body" },
+      "life-admin": { label: "Life admin", biome: "Admin" }
+    };
+    const STARTER = [
+      { id: "q1", title: "Reset the kitchen", cat: "cooking", difficulty: "medium", minutes: 12, xp: 35, coins: 4, first: "Put one dish in the sink or dishwasher.", track: "boost" },
+      { id: "q2", title: "Make a snack that counts", cat: "cooking", difficulty: "easy", minutes: 8, xp: 20, coins: 2, first: "Open the fridge and pick one thing you can eat now.", track: "calm" },
+      { id: "q3", title: "Clear one surface", cat: "cleaning", difficulty: "easy", minutes: 6, xp: 20, coins: 2, first: "Choose one bench. Move three things off it.", track: "boost" },
+      { id: "q4", title: "Start a load of laundry", cat: "cleaning", difficulty: "medium", minutes: 10, xp: 35, coins: 4, first: "Carry the basket to the machine. Do not sort yet.", track: "boost" },
+      { id: "q5", title: "Shower side quest", cat: "self-care", difficulty: "hard", minutes: 15, xp: 55, coins: 7, first: "Put a towel where you can see it.", track: "calm" },
+      { id: "q6", title: "Teeth and face", cat: "self-care", difficulty: "easy", minutes: 4, xp: 20, coins: 2, first: "Pick up the toothbrush. Paste can wait one second.", track: "calm" },
+      { id: "q7", title: "Reply to one message", cat: "life-admin", difficulty: "medium", minutes: 5, xp: 35, coins: 4, first: "Open the thread. You only owe one sentence.", track: "calm" },
+      { id: "q8", title: "Move one bill forward", cat: "life-admin", difficulty: "hard", minutes: 10, xp: 55, coins: 7, first: "Find the email or envelope. Do not pay yet.", track: "calm" }
+    ];
+    const CARDS = [
+      { id: "wool", name: "Woolworths $5", cost: 18 },
+      { id: "coles", name: "Coles $5", cost: 18 },
+      { id: "kmart", name: "Kmart $10", cost: 32 },
+      { id: "uber", name: "Uber Eats $10", cost: 32 },
+      { id: "spot", name: "Spotify $10", cost: 30 },
+      { id: "mecca", name: "Mecca $15", cost: 48 }
+    ];
+    const state = load();
+    let activeId = state.quests.find(q => !q.done)?.id || state.quests[0]?.id;
+    let timer = null, remain = 0, audio = null, playing = false;
+
+    function today() { return new Date().toISOString().slice(0, 10); }
+    function load() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(KEY));
+        if (raw && raw.quests) return raw;
+      } catch (e) {}
+      return {
+        xp: 0, coins: 0, streak: 0, lastClear: null,
+        mood: "steady", energy: "mid", track: "calm", connect: null,
+        quests: STARTER.map(q => ({ ...q, done: false, started: false })),
+        redemptions: []
+      };
+    }
+    function save() { localStorage.setItem(KEY, JSON.stringify(state)); render(); }
+    function toast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg; el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 2200);
+    }
+    function show(view) {
+      ["today", "focus", "sound", "loot", "guide"].forEach(v => {
+        document.getElementById("view-" + v).classList.toggle("hidden", v !== view);
+        document.querySelector('.tab[data-view="' + v + '"]').classList.toggle("active", v === view);
+      });
+    }
+    function active() { return state.quests.find(q => q.id === activeId) || state.quests[0]; }
+    function hourGreet() {
+      const h = new Date().getHours();
+      if (h < 12) return "Morning map. One clear is enough.";
+      if (h < 17) return "Afternoon campaign. Start tiny.";
+      return "Evening side quests still count.";
+    }
+    function bumpStreak() {
+      const t = today();
+      if (state.lastClear === t) return;
+      const y = new Date(); y.setDate(y.getDate() - 1);
+      const ys = y.toISOString().slice(0, 10);
+      state.streak = state.lastClear === ys ? state.streak + 1 : 1;
+      state.lastClear = t;
+    }
+    function reward(q, kind) {
+      const xp = kind === "tiny" ? Math.round(q.xp * 0.35) : q.xp;
+      const coins = kind === "tiny" ? 1 : q.coins;
+      state.xp += xp; state.coins += coins;
+      if (kind === "tiny") q.started = true;
+      else q.done = true;
+      bumpStreak();
+      toast(kind === "tiny" ? "First step counted. +" + xp + " XP" : "Quest cleared. +" + coins + " loot");
+      save();
+    }
+
+    function render() {
+      document.getElementById("xpStat").textContent = state.xp;
+      document.getElementById("coinStat").textContent = state.coins;
+      document.getElementById("greeting").textContent = hourGreet();
+      const paused = state.lastClear && state.lastClear !== today() && state.streak;
+      document.getElementById("streakLine").textContent = paused
+        ? "Streak paused at " + state.streak + ". Pick it up with one tiny clear."
+        : (state.streak ? state.streak + "-day streak. You are mid-campaign." : "No streak pressure. Begin when you can.");
+      document.getElementById("xpFill").style.width = Math.min(100, (state.xp % 100)) + "%";
+      document.querySelectorAll("[data-mood]").forEach(b => b.classList.toggle("active", b.dataset.mood === state.mood));
+      document.querySelectorAll("[data-energy]").forEach(b => b.classList.toggle("active", b.dataset.energy === state.energy));
+      document.querySelectorAll("[data-track]").forEach(b => b.classList.toggle("active", b.dataset.track === state.track));
+
+      const list = document.getElementById("questList");
+      const energyRank = { low: 0, mid: 1, high: 2 };
+      const vis = state.quests.filter(q => {
+        if (state.energy === "low") return q.difficulty !== "hard";
+        return true;
+      });
+      list.innerHTML = vis.map(q => {
+        const c = CATS[q.cat];
+        return '<div class="quest">' +
+          '<div><div class="tag">' + c.biome + ' · ' + q.difficulty + (q.done ? ' · cleared' : q.started ? ' · started' : '') + '</div>' +
+          '<strong>' + q.title + '</strong>' +
+          '<div class="muted">First step: ' + q.first + '</div></div>' +
+          '<button class="btn" data-open="' + q.id + '">' + (q.done ? 'Replay' : 'Begin') + '</button></div>';
+      }).join("") || '<p class="muted">All clear. Add a quest from Guide.</p>';
+
+      const q = active();
+      if (q) {
+        const c = CATS[q.cat];
+        document.getElementById("focusTag").textContent = c.label + " · " + c.biome;
+        document.getElementById("focusTitle").textContent = q.title;
+        document.getElementById("focusMeta").textContent = q.difficulty + " · ~" + q.minutes + " min · " + q.xp + " XP · " + q.coins + " loot";
+        document.getElementById("focusStep").textContent = q.first;
+      }
+
+      document.getElementById("nowPlaying").textContent = playing
+        ? (state.track === "boost" ? "Boost mix on. Launch energy." : "Calm mix on. Soft landing.")
+        : "Quiet map. Press play when you are ready.";
+      document.getElementById("soundCard").classList.toggle("playing", playing);
+      document.getElementById("playBtn").textContent = playing ? "Pause mix" : "Play built-in mix";
+      document.getElementById("connectNote").textContent = state.connect
+        ? state.connect + " linked in this demo. Built-in mix still plays here."
+        : "Demo connections only. The built-in mix actually plays.";
+
+      document.getElementById("lootBank").textContent = state.coins + " coins ready to redeem";
+      document.getElementById("lootGrid").innerHTML = CARDS.map(card =>
+        '<button class="loot" data-redeem="' + card.id + '"><b>' + card.name + '</b><span class="muted">' + card.cost + ' coins</span></button>'
+      ).join("");
+      document.getElementById("lootLog").innerHTML = state.redemptions.length
+        ? "<p><b>Vault</b></p>" + state.redemptions.map(r => '<p class="muted">' + r + '</p>').join("")
+        : '<p class="muted">No gift cards yet. Clears turn into loot you can actually use.</p>';
+
+      const tips = {
+        foggy: "Fog is a status effect. One object moved is a clear.",
+        steady: "You do not have to finish. You have to begin.",
+        charged: "Spend the charge on the quest you keep dodging."
+      };
+      document.getElementById("guideLine").textContent = tips[state.mood];
+    }
+
+    document.querySelectorAll(".tab").forEach(b => b.onclick = () => show(b.dataset.view));
+    document.getElementById("questList").addEventListener("click", e => {
+      const id = e.target.dataset.open;
+      if (!id) return;
+      activeId = id;
+      const q = active();
+      state.track = q.track;
+      save(); show("focus");
+    });
+    document.querySelectorAll("[data-mood]").forEach(b => b.onclick = () => { state.mood = b.dataset.mood; save(); });
+    document.querySelectorAll("[data-energy]").forEach(b => b.onclick = () => { state.energy = b.dataset.energy; save(); });
+    document.querySelectorAll("[data-track]").forEach(b => b.onclick = () => { state.track = b.dataset.track; if (playing) startAudio(); save(); });
+    document.querySelectorAll("[data-timer]").forEach(b => b.onclick = () => {
+      document.querySelectorAll("[data-timer]").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      remain = Number(b.dataset.timer) * 60;
+      clearInterval(timer);
+      timer = setInterval(() => {
+        remain -= 1;
+        const m = Math.floor(remain / 60), s = String(remain % 60).padStart(2, "0");
+        document.getElementById("timerLabel").textContent = remain > 0 ? m + ":" + s + " left. Stay with the first step." : "Timer done. Done enough counts.";
+        if (remain <= 0) clearInterval(timer);
+      }, 1000);
+    });
+    document.getElementById("startTiny").onclick = () => { if (active()) reward(active(), "tiny"); };
+    document.getElementById("clearQuest").onclick = () => { if (active()) reward(active(), "full"); };
+    document.getElementById("pauseQuest").onclick = () => { toast("Paused. The quest waits. No penalty."); show("today"); };
+    document.getElementById("frozenBtn").onclick = () => show("guide");
+    document.getElementById("addBtn").onclick = () => show("guide");
+    document.getElementById("guideStart").onclick = () => {
+      const q = state.quests.find(x => !x.done) || state.quests[0];
+      activeId = q.id; show("focus"); toast("Only the first step exists right now.");
+    };
+    document.getElementById("saveQuest").onclick = () => {
+      const title = document.getElementById("newTitle").value.trim();
+      const first = document.getElementById("newStep").value.trim();
+      if (!title || !first) return toast("Name it and give it a first step.");
+      state.quests.unshift({
+        id: "c" + Date.now(), title, cat: document.getElementById("newCat").value,
+        difficulty: "easy", minutes: 8, xp: 20, coins: 2, first, track: state.track, done: false, started: false
+      });
+      document.getElementById("newTitle").value = "";
+      document.getElementById("newStep").value = "";
+      toast("Quest added to today."); save(); show("today");
+    };
+    document.getElementById("lootGrid").addEventListener("click", e => {
+      const btn = e.target.closest("[data-redeem]");
+      if (!btn) return;
+      const card = CARDS.find(c => c.id === btn.dataset.redeem);
+      if (state.coins < card.cost) return toast("Need a few more clears.");
+      state.coins -= card.cost;
+      state.redemptions.unshift(card.name + " · demo code CLEAR-" + Math.random().toString(36).slice(2, 7).toUpperCase());
+      toast("Loot dropped. " + card.name);
+      save();
+    });
+    document.querySelectorAll("[data-connect]").forEach(b => b.onclick = () => {
+      state.connect = b.dataset.connect === "spotify" ? "Spotify" : "Apple Music";
+      toast(state.connect + " connected in demo mode"); save();
+    });
+
+    function viz() {
+      const el = document.getElementById("viz");
+      el.innerHTML = "";
+      for (let i = 0; i < 18; i++) el.appendChild(document.createElement("span"));
+    }
+    function stopAudio() {
+      if (audio) { audio.osc.forEach(o => o.stop()); audio.ctx.close(); audio = null; }
+      playing = false;
+    }
+    function startAudio() {
+      stopAudio();
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const master = ctx.createGain(); master.gain.value = 0.045; master.connect(ctx.destination);
+      const freqs = state.track === "boost" ? [196, 247, 294, 392] : [174, 220, 261, 329];
+      const osc = freqs.map((f, i) => {
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.type = state.track === "boost" ? "triangle" : "sine";
+        o.frequency.value = f;
+        g.gain.value = 0.2 + i * 0.05;
+        o.connect(g); g.connect(master); o.start();
+        return o;
+      });
+      audio = { ctx, osc }; playing = true; render();
+    }
+    document.getElementById("playBtn").onclick = () => {
+      if (playing) { stopAudio(); render(); }
+      else startAudio();
+    };
+
+    viz(); render();
+  </script>
+</body>
+</html>
