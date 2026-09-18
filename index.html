@@ -3,480 +3,556 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#F4C2D7" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>Clears — play the day</title>
-  <meta name="description" content="Gamified ADHD task manager. Everyday tasks become quests with XP, streaks, soundtrack, and gift-card loot." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,650;1,9..144,500&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --pink: #ffd6e8;
-      --pink-deep: #e8a0b8;
-      --lavender: #ddd6ff;
-      --violet: #6d5cae;
-      --rose: #c45c7c;
-      --cream: #fff7fb;
-      --ink: #3a2438;
-      --mute: #7a6576;
+      --cream: #fff8f4;
+      --blush: #fde8f0;
+      --pink: #f4c2d7;
+      --bloom: #e89bb5;
+      --lilac: #cbb6e8;
+      --violet: #9a7bb8;
+      --ink: #3a2f45;
+      --mute: #6f627a;
       --card: rgba(255, 255, 255, 0.72);
-      --line: rgba(58, 36, 56, 0.1);
-      --shadow: 0 18px 50px rgba(109, 92, 174, 0.16);
-      --ok: #3d8b74;
+      --gold: #d4a017;
+      --mint: #bfe8d2;
+      --shadow: 0 18px 50px rgba(154, 123, 184, 0.18);
+      --radius: 28px;
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; min-height: 100%; }
     body {
-      font-family: Nunito, sans-serif;
+      font-family: Nunito, system-ui, sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(1000px 600px at -10% -10%, var(--pink), transparent 55%),
-        radial-gradient(900px 500px at 110% 0%, var(--lavender), transparent 50%),
-        radial-gradient(700px 400px at 50% 110%, #f7d9ff, transparent 45%),
+        radial-gradient(1200px 700px at -10% -20%, #f8d5e6 0%, transparent 55%),
+        radial-gradient(900px 600px at 110% 0%, #ddd0f5 0%, transparent 50%),
+        radial-gradient(800px 500px at 50% 120%, #fde2c8 0%, transparent 45%),
         var(--cream);
     }
     button, input, select, textarea { font: inherit; color: inherit; }
-    h1, h2, h3 { font-family: Fraunces, serif; font-weight: 650; margin: 0; }
-    p { margin: 0; }
-    .app { width: min(430px, 100%); margin: 0 auto; min-height: 100vh; padding: 18px 16px 108px; position: relative; }
-    .orb {
-      position: absolute; border-radius: 50%; filter: blur(2px); pointer-events: none; opacity: 0.55;
+    button { cursor: pointer; }
+    h1, h2, h3, .serif { font-family: Fraunces, Georgia, serif; font-weight: 650; }
+    .app {
+      width: min(430px, 100%);
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding: 18px 16px 108px;
+      position: relative;
     }
     .top {
-      display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
     }
-    .brand-kicker { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--violet); font-weight: 800; }
-    .brand h1 { font-size: 34px; line-height: 1; }
-    .brand p { color: var(--mute); margin-top: 6px; font-size: 14px; }
+    .brand { display: flex; gap: 10px; align-items: center; }
+    .logo {
+      width: 42px; height: 42px; border-radius: 16px;
+      background: linear-gradient(135deg, var(--pink), var(--lilac));
+      display: grid; place-items: center; font-size: 20px;
+      box-shadow: var(--shadow);
+    }
+    .brand small { display: block; color: var(--mute); font-weight: 600; margin-top: -2px; }
     .pills { display: flex; gap: 8px; }
     .stat {
-      background: var(--card); backdrop-filter: blur(16px); border: 1px solid var(--line);
-      border-radius: 18px; padding: 8px 12px; text-align: right; box-shadow: var(--shadow);
+      background: var(--card); backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,.8);
+      border-radius: 999px; padding: 8px 12px; font-weight: 800; font-size: 13px;
     }
-    .stat b { display: block; font-size: 18px; }
-    .stat span { font-size: 11px; color: var(--mute); font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
-    .card {
-      background: var(--card); border: 1px solid var(--line); border-radius: 24px;
-      padding: 16px; box-shadow: var(--shadow); backdrop-filter: blur(18px);
+    .hero, .card {
+      background: var(--card); backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.85);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 14px;
     }
-    .row { display: flex; gap: 8px; flex-wrap: wrap; }
-    .chip, .btn, .tab {
-      border: 1px solid var(--line); background: rgba(255,255,255,0.55); border-radius: 999px;
-      min-height: 44px; padding: 0 14px; cursor: pointer;
+    .kicker {
+      text-transform: uppercase; letter-spacing: .12em;
+      font-size: 11px; font-weight: 800; color: var(--violet); margin: 0 0 6px;
     }
-    .chip.active, .btn.primary {
-      background: linear-gradient(135deg, #f4b8cc, #cbb8f4); border-color: transparent; font-weight: 800;
+    .hero h2 { margin: 0 0 8px; font-size: 28px; line-height: 1.15; }
+    .lede { margin: 0; color: var(--mute); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .chip, .btn, .navbtn {
+      border: 0; border-radius: 999px; padding: 10px 14px; font-weight: 800;
+      background: #fff; color: var(--ink);
     }
-    .btn.ghost { background: transparent; }
-    .btn.wide { width: 100%; border-radius: 16px; font-weight: 800; }
-    .btn.good { background: #d8f3ea; border-color: transparent; color: var(--ok); font-weight: 800; }
-    .section { margin-top: 14px; }
+    .chip.on, .btn.primary {
+      background: linear-gradient(135deg, var(--bloom), var(--violet));
+      color: #fff;
+    }
+    .btn.ghost { background: #fff; }
+    .btn.wide { width: 100%; margin-top: 12px; padding: 14px; }
+    .btn.calm { background: var(--mint); }
+    .row { display: flex; gap: 8px; }
+    .row .btn { flex: 1; }
     .quest {
-      display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--line);
+      display: grid; grid-template-columns: 52px 1fr auto; gap: 12px; align-items: center;
+      width: 100%; text-align: left; background: #fff; border: 0;
+      border-radius: 22px; padding: 12px; margin-bottom: 8px;
     }
-    .quest:last-child { border-bottom: 0; padding-bottom: 0; }
-    .tag { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--rose); }
-    .muted { color: var(--mute); font-size: 13px; }
-    .xpbar { height: 8px; background: rgba(255,255,255,0.7); border-radius: 99px; overflow: hidden; margin-top: 10px; }
-    .xpbar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #f3a7c1, #a994e8); }
-    .nav {
+    .badge {
+      width: 52px; height: 52px; border-radius: 18px; display: grid; place-items: center;
+      font-size: 24px; background: var(--blush);
+    }
+    .quest b { display: block; }
+    .meta { color: var(--mute); font-size: 13px; font-weight: 700; }
+    .xp { font-weight: 800; color: var(--violet); font-size: 13px; }
+    .dock {
       position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
-      width: min(400px, calc(100% - 24px)); display: grid; grid-template-columns: repeat(5, 1fr);
-      background: rgba(255,255,255,0.86); backdrop-filter: blur(18px); border: 1px solid var(--line);
-      border-radius: 22px; padding: 6px; box-shadow: var(--shadow); z-index: 5;
+      width: min(400px, calc(100% - 20px));
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      background: rgba(255,255,255,.86); backdrop-filter: blur(18px);
+      border-radius: 28px; padding: 8px; box-shadow: var(--shadow);
     }
-    .tab { min-height: 52px; border: 0; background: transparent; border-radius: 16px; font-size: 11px; font-weight: 800; }
-    .tab.active { background: linear-gradient(180deg, #ffe4ef, #e8e0ff); }
-    .hero { font-size: 22px; margin-bottom: 8px; }
-    .first { font-size: 18px; line-height: 1.35; }
-    .loot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .loot {
-      border: 1px solid var(--line); border-radius: 18px; padding: 12px; background: rgba(255,255,255,0.65); text-align: left;
+    .navbtn { background: transparent; padding: 8px 4px; font-size: 11px; }
+    .navbtn span { display: block; font-size: 18px; }
+    .navbtn.on { background: var(--blush); }
+    .step {
+      background: linear-gradient(180deg, #fff, var(--blush));
+      border-radius: 24px; padding: 20px; text-align: center; margin: 12px 0;
     }
-    .loot b { display: block; font-size: 15px; }
-    .field { width: 100%; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; background: #fff; margin-top: 8px; }
-    .viz {
-      height: 54px; display: flex; align-items: flex-end; gap: 4px; margin: 12px 0 4px;
+    .step p { font-size: 22px; font-family: Fraunces, serif; margin: 8px 0 0; }
+    .player {
+      display: flex; align-items: center; gap: 12px;
+      background: #2b2233; color: #fff; border-radius: 22px; padding: 12px;
     }
-    .viz span {
-      flex: 1; background: linear-gradient(180deg, #f4b4cc, #b7a6f0); border-radius: 99px 99px 6px 6px; height: 18%;
+    .eq {
+      width: 44px; height: 44px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--bloom), var(--violet));
+      display: flex; align-items: end; justify-content: center; gap: 3px; padding: 10px 0;
     }
-    .playing .viz span { animation: eq 1s ease-in-out infinite; }
-    .playing .viz span:nth-child(2n) { animation-delay: .15s; }
-    .playing .viz span:nth-child(3n) { animation-delay: .28s; }
-    @keyframes eq {
-      0%, 100% { height: 18%; }
-      50% { height: 92%; }
+    .eq i {
+      width: 4px; background: #fff; border-radius: 4px; display: block;
+      animation: bounce 1s ease-in-out infinite;
+    }
+    .eq i:nth-child(2) { animation-delay: .15s; height: 70%; }
+    .eq i:nth-child(3) { animation-delay: .3s; }
+    .eq.pause i { animation: none; height: 30% !important; }
+    @keyframes bounce {
+      0%, 100% { height: 30%; }
+      50% { height: 90%; }
+    }
+    .loot-card {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #fff; border-radius: 20px; padding: 14px; margin-bottom: 8px;
     }
     .toast {
-      position: fixed; left: 50%; top: 16px; transform: translateX(-50%);
-      background: var(--ink); color: #fff; padding: 10px 14px; border-radius: 999px;
-      font-size: 13px; font-weight: 700; opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 9;
+      position: fixed; left: 50%; top: 18px; transform: translateX(-50%);
+      background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 999px;
+      font-weight: 800; z-index: 20; display: none;
     }
-    .toast.show { opacity: 1; }
-    .hidden { display: none; }
+    .gate { min-height: 100dvh; display: grid; place-items: center; padding: 24px; }
+    .gate .card { width: min(430px, 100%); }
+    .field { width: 100%; border: 0; background: #fff; border-radius: 16px; padding: 12px 14px; margin-top: 8px; }
+    .hidden { display: none !important; }
+    .progress {
+      height: 8px; background: #efe6f4; border-radius: 99px; overflow: hidden; margin: 10px 0 4px;
+    }
+    .progress b { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--bloom), var(--violet)); }
     @media (prefers-reduced-motion: reduce) {
-      .playing .viz span { animation: none; height: 55%; }
+      .eq i { animation: none; height: 50%; }
     }
   </style>
 </head>
 <body>
   <div class="toast" id="toast"></div>
-  <main class="app">
-    <header class="top">
-      <div class="brand">
-        <div class="brand-kicker">Daily living RPG</div>
-        <h1>Clears</h1>
-        <p>Less guilt. More clears.</p>
-      </div>
-      <div class="pills">
-        <div class="stat"><b id="xpStat">0</b><span>XP</span></div>
-        <div class="stat"><b id="coinStat">0</b><span>Loot</span></div>
-      </div>
-    </header>
+  <div id="gate" class="gate"></div>
+  <div id="app" class="app hidden"></div>
+  <nav class="dock hidden" id="dock"></nav>
+<script>
+const QUESTS = [
+  { id: "kitchen", cat: "cooking", icon: "🍳", title: "Reset the kitchen", minutes: 15, xp: 40, loot: 14, energy: ["low","okay","charged"],
+    first: "Put one mug in the dishwasher or sink.",
+    steps: ["Clear just the sink.", "Wipe one bench patch.", "Start or empty the dishwasher."],
+    boost: "Kettle Tempo", calm: "Warm Porcelain" },
+  { id: "dinner", cat: "cooking", icon: "🥗", title: "Make a real dinner", minutes: 25, xp: 55, loot: 18, energy: ["okay","charged"],
+    first: "Take the pan out and put it on the stove. Do not cook yet.",
+    steps: ["Add one ingredient you already have.", "Turn the heat on.", "Plate it, even if it is simple."],
+    boost: "Chop Chop", calm: "Simmer Down" },
+  { id: "wash", cat: "cleaning", icon: "🧺", title: "Start a load of washing", minutes: 8, xp: 28, loot: 10, energy: ["frozen","low","okay"],
+    first: "Pick up 5 pieces of clothing. Only 5.",
+    steps: ["Open the machine.", "Add soap if you can see it.", "Press start. Walk away."],
+    boost: "Spin Cycle", calm: "Laundry Rain" },
+  { id: "floor", cat: "cleaning", icon: "🧹", title: "Clear a walking path", minutes: 10, xp: 32, loot: 12, energy: ["low","okay"],
+    first: "Move 3 things off the floor into a chair or basket.",
+    steps: ["Choose one room.", "Fill one bag or basket.", "Stop at 10 minutes."],
+    boost: "Pathfinder", calm: "Soft Sweep" },
+  { id: "shower", cat: "care", icon: "🛁", title: "Take a shower", minutes: 12, xp: 36, loot: 12, energy: ["frozen","low","okay","charged"],
+    first: "Put a towel where you can see it.",
+    steps: ["Turn the water on.", "Step in for 2 minutes.", "Soap one area. Done counts."],
+    boost: "Steam Up", calm: "Rain Booth" },
+  { id: "water", cat: "care", icon: "💧", title: "Drink water and take meds", minutes: 3, xp: 18, loot: 6, energy: ["frozen","low","okay","charged"],
+    first: "Fill a glass. Do not drink yet if that helps.",
+    steps: ["Take the sip.", "Put meds next to the glass.", "Swallow, then tick it."],
+    boost: "Bright Sip", calm: "Still Water" },
+  { id: "mail", cat: "admin", icon: "📬", title: "Open one piece of mail", minutes: 7, xp: 30, loot: 11, energy: ["okay","charged"],
+    first: "Pick up one envelope. Leave the rest.",
+    steps: ["Open it.", "Write one next action on the back.", "Put it in a done pile."],
+    boost: "Inbox Boss", calm: "Paper Quiet" },
+  { id: "appt", cat: "admin", icon: "📅", title: "Book or confirm one appointment", minutes: 6, xp: 34, loot: 12, energy: ["okay","charged"],
+    first: "Open the booking app or find the number. Stop there.",
+    steps: ["Choose a day that is fine, not perfect.", "Book it.", "Add it to your phone calendar."],
+    boost: "Call Courage", calm: "Hold Music" }
+];
 
-    <section id="view-today">
-      <div class="card">
-        <h2 class="hero" id="greeting">Play the day you already have.</h2>
-        <p class="muted" id="streakLine">Start one tiny quest. The boss fight is beginning, not finishing.</p>
-        <div class="xpbar" aria-hidden="true"><i id="xpFill"></i></div>
-        <div class="row section">
-          <button class="chip" data-mood="foggy">Foggy</button>
-          <button class="chip" data-mood="steady">Steady</button>
-          <button class="chip" data-mood="charged">Charged</button>
-        </div>
-        <div class="row section">
-          <button class="chip" data-energy="low">Low energy</button>
-          <button class="chip" data-energy="mid">Mid</button>
-          <button class="chip" data-energy="high">High</button>
-        </div>
-      </div>
-      <div class="card section">
-        <div class="row" style="justify-content:space-between;align-items:center">
-          <h2>Today’s map</h2>
-          <button class="btn" id="addBtn">+ Quest</button>
-        </div>
-        <p class="muted" style="margin-top:6px">Cooking, cleaning, self-care, admin. Pick one. Tiny is allowed.</p>
-        <div id="questList"></div>
-      </div>
-      <button class="btn wide section" id="frozenBtn">I’m frozen — help me start</button>
-    </section>
+const CARDS = [
+  { id: "wool", name: "Woolworths", cost: 80, value: "$10" },
+  { id: "coles", name: "Coles", cost: 80, value: "$10" },
+  { id: "uber", name: "Uber Eats", cost: 70, value: "$10" },
+  { id: "spot", name: "Spotify", cost: 90, value: "$15" },
+  { id: "kmart", name: "Kmart", cost: 60, value: "$10" },
+  { id: "chem", name: "Chemist Warehouse", cost: 75, value: "$10" }
+];
 
-    <section id="view-focus" class="hidden">
-      <div class="card">
-        <p class="tag" id="focusTag">Quest</p>
-        <h2 class="hero" id="focusTitle">Quest</h2>
-        <p class="muted" id="focusMeta"></p>
-        <p style="margin:14px 0 6px;font-weight:800">First step</p>
-        <p class="first" id="focusStep"></p>
-        <div class="row section">
-          <button class="chip" data-timer="5">5 min</button>
-          <button class="chip" data-timer="10">10 min</button>
-          <button class="chip" data-timer="15">15 min</button>
-        </div>
-        <p class="muted" id="timerLabel">No timer. Start whenever.</p>
-        <div class="row section">
-          <button class="btn primary" id="startTiny">I started</button>
-          <button class="btn good" id="clearQuest">Clear it</button>
-        </div>
-        <button class="btn wide ghost section" id="pauseQuest">Pause without guilt</button>
-      </div>
-    </section>
+const defaultState = () => ({
+  name: "", zones: [], music: "both", onboarded: false,
+  energy: "okay", tab: "today", xp: 20, loot: 24, streak: 1,
+  lastClear: null, custom: [], active: null, step: 0,
+  soundMode: "calm", playing: false, biome: "home",
+  connected: { spotify: false, apple: false }, plan: "free",
+  history: []
+});
 
-    <section id="view-sound" class="hidden">
-      <div class="card" id="soundCard">
-        <h2>Soundtrack</h2>
-        <p class="muted" style="margin-top:6px">Match the biome and the state you are in. Boost to launch. Calm to stay.</p>
-        <div class="viz" id="viz"></div>
-        <p id="nowPlaying">Quiet map. Press play when you are ready.</p>
-        <div class="row section">
-          <button class="chip" data-track="calm">Calm</button>
-          <button class="chip" data-track="boost">Boost</button>
-        </div>
-        <button class="btn wide primary section" id="playBtn">Play built-in mix</button>
-        <div class="row section">
-          <button class="btn" data-connect="spotify">Connect Spotify</button>
-          <button class="btn" data-connect="apple">Apple Music</button>
-        </div>
-        <p class="muted" id="connectNote">Demo connections only. The built-in mix actually plays.</p>
-      </div>
-    </section>
+let state = load();
+let audio = { ctx: null, nodes: [], timer: null };
 
-    <section id="view-loot" class="hidden">
-      <div class="card">
-        <h2>Real loot</h2>
-        <p class="muted" style="margin-top:6px">Not badges. Gift cards from the coins you clear. Demo redemption only.</p>
-        <p style="margin-top:10px"><b id="lootBank">0 coins</b></p>
-      </div>
-      <div class="loot-grid section" id="lootGrid"></div>
-      <div class="card section" id="lootLog"></div>
-    </section>
+function load() {
+  try {
+    const raw = localStorage.getItem("clears-state");
+    return raw ? { ...defaultState(), ...JSON.parse(raw) } : defaultState();
+  } catch { return defaultState(); }
+}
+function save() { localStorage.setItem("clears-state", JSON.stringify(state)); }
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 2200);
+}
+function todayKey() { return new Date().toISOString().slice(0,10); }
+function allQuests() { return QUESTS.concat(state.custom); }
+function recommended() {
+  const pool = allQuests().filter(q => !state.history.includes(q.id) && (q.energy || ["okay"]).includes(state.energy));
+  const prefer = pool.filter(q => !state.zones.length || state.zones.includes(q.cat));
+  return (prefer[0] || pool[0] || allQuests()[0]);
+}
 
-    <section id="view-guide" class="hidden">
-      <div class="card">
-        <h2>If you are frozen</h2>
-        <p class="first" style="margin-top:8px" id="guideLine">You do not have to finish. You have to begin.</p>
-        <button class="btn wide primary section" id="guideStart">Give me the tiniest quest</button>
-      </div>
-      <div class="card section">
-        <h2>How Clears plays</h2>
-        <p class="muted" style="margin-top:8px">Everyday tasks become missions. A first step is a real clear. Soundtrack helps you launch. XP becomes gift-card loot. A paused streak is not a failure.</p>
-      </div>
-      <div class="card section">
-        <h2>Add a quest</h2>
-        <input class="field" id="newTitle" placeholder="Name the quest" />
-        <select class="field" id="newCat">
-          <option value="cooking">Cooking — Kitchen biome</option>
-          <option value="cleaning">Cleaning — Nest biome</option>
-          <option value="self-care">Self-care — Body biome</option>
-          <option value="life-admin">Life admin — Paperwork biome</option>
-        </select>
-        <input class="field" id="newStep" placeholder="First step only" />
-        <button class="btn wide primary section" id="saveQuest">Save to today</button>
-      </div>
-    </section>
-  </main>
-
-  <nav class="nav" aria-label="Main">
-    <button class="tab active" data-view="today">Today</button>
-    <button class="tab" data-view="focus">Focus</button>
-    <button class="tab" data-view="sound">Sound</button>
-    <button class="tab" data-view="loot">Loot</button>
-    <button class="tab" data-view="guide">Guide</button>
-  </nav>
-
-  <script>
-    const KEY = "clears-save-v1";
-    const CATS = {
-      cooking: { label: "Cooking", biome: "Kitchen" },
-      cleaning: { label: "Cleaning", biome: "Nest" },
-      "self-care": { label: "Self-care", biome: "Body" },
-      "life-admin": { label: "Life admin", biome: "Admin" }
+function startAudio(mode) {
+  stopAudio();
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return;
+  const ctx = new Ctx();
+  audio.ctx = ctx;
+  const master = ctx.createGain(); master.gain.value = 0.04; master.connect(ctx.destination);
+  const notes = mode === "boost" ? [196, 247, 294, 392] : [174, 220, 261];
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = mode === "boost" ? "triangle" : "sine";
+    osc.frequency.value = freq;
+    g.gain.value = 0;
+    osc.connect(g); g.connect(master);
+    osc.start();
+    const pulse = () => {
+      const now = ctx.currentTime;
+      g.gain.cancelScheduledValues(now);
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(mode === "boost" ? 0.18 : 0.12, now + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.001, now + (mode === "boost" ? 0.35 : 1.6));
     };
-    const STARTER = [
-      { id: "q1", title: "Reset the kitchen", cat: "cooking", difficulty: "medium", minutes: 12, xp: 35, coins: 4, first: "Put one dish in the sink or dishwasher.", track: "boost" },
-      { id: "q2", title: "Make a snack that counts", cat: "cooking", difficulty: "easy", minutes: 8, xp: 20, coins: 2, first: "Open the fridge and pick one thing you can eat now.", track: "calm" },
-      { id: "q3", title: "Clear one surface", cat: "cleaning", difficulty: "easy", minutes: 6, xp: 20, coins: 2, first: "Choose one bench. Move three things off it.", track: "boost" },
-      { id: "q4", title: "Start a load of laundry", cat: "cleaning", difficulty: "medium", minutes: 10, xp: 35, coins: 4, first: "Carry the basket to the machine. Do not sort yet.", track: "boost" },
-      { id: "q5", title: "Shower side quest", cat: "self-care", difficulty: "hard", minutes: 15, xp: 55, coins: 7, first: "Put a towel where you can see it.", track: "calm" },
-      { id: "q6", title: "Teeth and face", cat: "self-care", difficulty: "easy", minutes: 4, xp: 20, coins: 2, first: "Pick up the toothbrush. Paste can wait one second.", track: "calm" },
-      { id: "q7", title: "Reply to one message", cat: "life-admin", difficulty: "medium", minutes: 5, xp: 35, coins: 4, first: "Open the thread. You only owe one sentence.", track: "calm" },
-      { id: "q8", title: "Move one bill forward", cat: "life-admin", difficulty: "hard", minutes: 10, xp: 55, coins: 7, first: "Find the email or envelope. Do not pay yet.", track: "calm" }
-    ];
-    const CARDS = [
-      { id: "wool", name: "Woolworths $5", cost: 18 },
-      { id: "coles", name: "Coles $5", cost: 18 },
-      { id: "kmart", name: "Kmart $10", cost: 32 },
-      { id: "uber", name: "Uber Eats $10", cost: 32 },
-      { id: "spot", name: "Spotify $10", cost: 30 },
-      { id: "mecca", name: "Mecca $15", cost: 48 }
-    ];
-    const state = load();
-    let activeId = state.quests.find(q => !q.done)?.id || state.quests[0]?.id;
-    let timer = null, remain = 0, audio = null, playing = false;
+    pulse();
+    const id = setInterval(pulse, mode === "boost" ? 420 + i * 40 : 1800 + i * 200);
+    audio.nodes.push({ osc, g, id });
+  });
+}
+function stopAudio() {
+  audio.nodes.forEach(n => { clearInterval(n.id); try { n.osc.stop(); } catch(e) {} });
+  audio.nodes = [];
+  if (audio.ctx) { audio.ctx.close(); audio.ctx = null; }
+}
 
-    function today() { return new Date().toISOString().slice(0, 10); }
-    function load() {
-      try {
-        const raw = JSON.parse(localStorage.getItem(KEY));
-        if (raw && raw.quests) return raw;
-      } catch (e) {}
-      return {
-        xp: 0, coins: 0, streak: 0, lastClear: null,
-        mood: "steady", energy: "mid", track: "calm", connect: null,
-        quests: STARTER.map(q => ({ ...q, done: false, started: false })),
-        redemptions: []
-      };
-    }
-    function save() { localStorage.setItem(KEY, JSON.stringify(state)); render(); }
-    function toast(msg) {
-      const el = document.getElementById("toast");
-      el.textContent = msg; el.classList.add("show");
-      setTimeout(() => el.classList.remove("show"), 2200);
-    }
-    function show(view) {
-      ["today", "focus", "sound", "loot", "guide"].forEach(v => {
-        document.getElementById("view-" + v).classList.toggle("hidden", v !== view);
-        document.querySelector('.tab[data-view="' + v + '"]').classList.toggle("active", v === view);
-      });
-    }
-    function active() { return state.quests.find(q => q.id === activeId) || state.quests[0]; }
-    function hourGreet() {
-      const h = new Date().getHours();
-      if (h < 12) return "Morning map. One clear is enough.";
-      if (h < 17) return "Afternoon campaign. Start tiny.";
-      return "Evening side quests still count.";
-    }
-    function bumpStreak() {
-      const t = today();
-      if (state.lastClear === t) return;
-      const y = new Date(); y.setDate(y.getDate() - 1);
-      const ys = y.toISOString().slice(0, 10);
-      state.streak = state.lastClear === ys ? state.streak + 1 : 1;
-      state.lastClear = t;
-    }
-    function reward(q, kind) {
-      const xp = kind === "tiny" ? Math.round(q.xp * 0.35) : q.xp;
-      const coins = kind === "tiny" ? 1 : q.coins;
-      state.xp += xp; state.coins += coins;
-      if (kind === "tiny") q.started = true;
-      else q.done = true;
-      bumpStreak();
-      toast(kind === "tiny" ? "First step counted. +" + xp + " XP" : "Quest cleared. +" + coins + " loot");
-      save();
-    }
+function renderGate() {
+  const g = document.getElementById("gate");
+  if (state.onboarded) { g.classList.add("hidden"); return; }
+  g.classList.remove("hidden");
+  g.innerHTML = `<div class="card">
+    <p class="kicker">Clears</p>
+    <h2 class="serif" style="margin:0 0 8px">Your brain knows the quest.</h2>
+    <p class="lede">Starting it is the boss fight. This is a daily-living game for ADHD and other neurodivergent minds. Less guilt. More clears.</p>
+    <label class="meta">What should we call you?</label>
+    <input class="field" id="name" placeholder="First name" value="${state.name}" />
+    <p class="meta" style="margin-top:14px">Where do you freeze most?</p>
+    <div class="chips" id="zones">
+      ${[["cooking","Cooking"],["cleaning","Cleaning"],["care","Self-care"],["admin","Life admin"]].map(([id,l]) =>
+        `<button class="chip ${state.zones.includes(id)?"on":""}" data-z="${id}">${l}</button>`).join("")}
+    </div>
+    <p class="meta" style="margin-top:14px">Soundtrack default</p>
+    <div class="chips">
+      ${[["boost","Lift me up"],["calm","Calm me down"],["both","Both"]].map(([id,l]) =>
+        `<button class="chip ${state.music===id?"on":""}" data-m="${id}">${l}</button>`).join("")}
+    </div>
+    <button class="btn primary wide" id="enter">Enter today's map</button>
+  </div>`;
+  g.querySelector("#zones").onclick = e => {
+    const z = e.target.dataset.z; if (!z) return;
+    state.zones = state.zones.includes(z) ? state.zones.filter(x => x!==z) : state.zones.concat(z);
+    renderGate();
+  };
+  g.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { state.music = b.dataset.m; state.soundMode = b.dataset.m === "boost" ? "boost" : "calm"; renderGate(); });
+  g.querySelector("#enter").onclick = () => {
+    state.name = g.querySelector("#name").value.trim() || "player";
+    state.onboarded = true; save(); boot();
+  };
+}
 
-    function render() {
-      document.getElementById("xpStat").textContent = state.xp;
-      document.getElementById("coinStat").textContent = state.coins;
-      document.getElementById("greeting").textContent = hourGreet();
-      const paused = state.lastClear && state.lastClear !== today() && state.streak;
-      document.getElementById("streakLine").textContent = paused
-        ? "Streak paused at " + state.streak + ". Pick it up with one tiny clear."
-        : (state.streak ? state.streak + "-day streak. You are mid-campaign." : "No streak pressure. Begin when you can.");
-      document.getElementById("xpFill").style.width = Math.min(100, (state.xp % 100)) + "%";
-      document.querySelectorAll("[data-mood]").forEach(b => b.classList.toggle("active", b.dataset.mood === state.mood));
-      document.querySelectorAll("[data-energy]").forEach(b => b.classList.toggle("active", b.dataset.energy === state.energy));
-      document.querySelectorAll("[data-track]").forEach(b => b.classList.toggle("active", b.dataset.track === state.track));
+function dock() {
+  const tabs = [["today","✨","Today"],["quests","🏺","Quests"],["sound","🎵","Sound"],["loot","🏆","Loot"],["you","🌟","You"]];
+  document.getElementById("dock").innerHTML = tabs.map(([id,i,l]) =>
+    `<button class="navbtn ${state.tab===id?"on":""}" data-t="${id}"><span>${i}</span>${l}</button>`).join("");
+  document.getElementById("dock").onclick = e => {
+    const t = e.target.closest("[data-t]"); if (!t) return;
+    state.tab = t.dataset.t; save(); render();
+  };
+}
 
-      const list = document.getElementById("questList");
-      const energyRank = { low: 0, mid: 1, high: 2 };
-      const vis = state.quests.filter(q => {
-        if (state.energy === "low") return q.difficulty !== "hard";
-        return true;
-      });
-      list.innerHTML = vis.map(q => {
-        const c = CATS[q.cat];
-        return '<div class="quest">' +
-          '<div><div class="tag">' + c.biome + ' · ' + q.difficulty + (q.done ? ' · cleared' : q.started ? ' · started' : '') + '</div>' +
-          '<strong>' + q.title + '</strong>' +
-          '<div class="muted">First step: ' + q.first + '</div></div>' +
-          '<button class="btn" data-open="' + q.id + '">' + (q.done ? 'Replay' : 'Begin') + '</button></div>';
-      }).join("") || '<p class="muted">All clear. Add a quest from Guide.</p>';
+function header() {
+  return `<div class="top">
+    <div class="brand"><div class="logo">✦</div><div><b>Clears</b><small>Play the day</small></div></div>
+    <div class="pills"><div class="stat">🔥 ${state.streak}</div><div class="stat">XP ${state.xp}</div><div class="stat">✦ ${state.loot}</div></div>
+  </div>`;
+}
 
-      const q = active();
-      if (q) {
-        const c = CATS[q.cat];
-        document.getElementById("focusTag").textContent = c.label + " · " + c.biome;
-        document.getElementById("focusTitle").textContent = q.title;
-        document.getElementById("focusMeta").textContent = q.difficulty + " · ~" + q.minutes + " min · " + q.xp + " XP · " + q.coins + " loot";
-        document.getElementById("focusStep").textContent = q.first;
-      }
+function renderToday() {
+  const q = recommended();
+  const hour = new Date().getHours();
+  const hello = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  return `${header()}
+    <section class="hero">
+      <p class="kicker">${hello}${state.name ? ", " + state.name : ""}</p>
+      <h2>Starting is the boss fight.</h2>
+      <p class="lede">Check your energy. We will only put one main quest in front of you.</p>
+      <div class="chips">
+        ${[["frozen","Frozen"],["low","Low"],["okay","Okay"],["charged","Charged"]].map(([id,l]) =>
+          `<button class="chip ${state.energy===id?"on":""}" data-e="${id}">${l}</button>`).join("")}
+      </div>
+    </section>
+    <section class="card">
+      <p class="kicker">Main quest</p>
+      ${questRow(q, true)}
+      <div class="row">
+        <button class="btn primary" data-start="${q.id}">Start the boss fight</button>
+        <button class="btn ghost" data-two="${q.id}">Just 2 minutes</button>
+      </div>
+    </section>
+    <section class="card">
+      <p class="kicker">Side quests</p>
+      ${allQuests().filter(x => x.id !== q.id).slice(0,3).map(x => questRow(x)).join("")}
+    </section>`;
+}
 
-      document.getElementById("nowPlaying").textContent = playing
-        ? (state.track === "boost" ? "Boost mix on. Launch energy." : "Calm mix on. Soft landing.")
-        : "Quiet map. Press play when you are ready.";
-      document.getElementById("soundCard").classList.toggle("playing", playing);
-      document.getElementById("playBtn").textContent = playing ? "Pause mix" : "Play built-in mix";
-      document.getElementById("connectNote").textContent = state.connect
-        ? state.connect + " linked in this demo. Built-in mix still plays here."
-        : "Demo connections only. The built-in mix actually plays.";
+function questRow(q, big) {
+  return `<button class="quest" data-open="${q.id}">
+    <div class="badge">${q.icon || "✦"}</div>
+    <div><b>${q.title}</b><div class="meta">${q.minutes || 10} min · ${q.cat}</div></div>
+    <div class="xp">+${q.xp} XP</div>
+  </button>${big ? `<p class="lede" style="margin:8px 0 0">First step: ${q.first}</p>` : ""}`;
+}
 
-      document.getElementById("lootBank").textContent = state.coins + " coins ready to redeem";
-      document.getElementById("lootGrid").innerHTML = CARDS.map(card =>
-        '<button class="loot" data-redeem="' + card.id + '"><b>' + card.name + '</b><span class="muted">' + card.cost + ' coins</span></button>'
-      ).join("");
-      document.getElementById("lootLog").innerHTML = state.redemptions.length
-        ? "<p><b>Vault</b></p>" + state.redemptions.map(r => '<p class="muted">' + r + '</p>').join("")
-        : '<p class="muted">No gift cards yet. Clears turn into loot you can actually use.</p>';
+function renderQuests() {
+  const cats = [["cooking","Cooking"],["cleaning","Cleaning"],["care","Self-care"],["admin","Life admin"]];
+  return `${header()}
+    <section class="card">
+      <p class="kicker">Brain dump</p>
+      <p class="lede">Write the thing. We will turn it into a tiny mission.</p>
+      <input class="field" id="dump" placeholder="e.g. reply to that email" />
+      <button class="btn primary wide" id="addDump">Make it a quest</button>
+    </section>
+    ${cats.map(([id,l]) => `<section class="card"><p class="kicker">${l}</p>
+      ${allQuests().filter(q => q.cat===id).map(q => questRow(q)).join("") || "<p class='lede'>Nothing here yet.</p>"}
+    </section>`).join("")}`;
+}
 
-      const tips = {
-        foggy: "Fog is a status effect. One object moved is a clear.",
-        steady: "You do not have to finish. You have to begin.",
-        charged: "Spend the charge on the quest you keep dodging."
-      };
-      document.getElementById("guideLine").textContent = tips[state.mood];
-    }
+function renderActive() {
+  const q = allQuests().find(x => x.id === state.active);
+  if (!q) { state.active = null; return renderToday(); }
+  const steps = [q.first].concat(q.steps || []);
+  const step = steps[state.step] || q.first;
+  const pct = Math.round((state.step / steps.length) * 100);
+  return `${header()}
+    <section class="hero">
+      <p class="kicker">${q.cat} · ${q.minutes} min</p>
+      <h2>${q.title}</h2>
+      <div class="progress"><b style="width:${pct}%"></b></div>
+      <p class="meta">Spark is sitting with you. You do not have to finish the mountain.</p>
+    </section>
+    <div class="step">
+      <p class="kicker">${state.step === 0 ? "Boss fight: begin" : "Next clear"}</p>
+      <p>${step}</p>
+    </div>
+    <div class="player ${state.playing ? "" : ""}">
+      <div class="eq ${state.playing ? "" : "pause"}"><i></i><i></i><i></i></div>
+      <div style="flex:1"><b>${state.soundMode === "boost" ? q.boost : q.calm}</b><div class="meta" style="color:#d7cbe4">${state.soundMode} · ${state.biome}</div></div>
+      <button class="btn" id="togglePlay">${state.playing ? "Pause" : "Play"}</button>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn primary" id="doneStep">I did this</button>
+      <button class="btn ghost" id="skipStep">Skip step</button>
+    </div>
+    <div class="row">
+      <button class="btn calm" id="froze">I froze</button>
+      <button class="btn ghost" id="park">Park quest</button>
+    </div>`;
+}
 
-    document.querySelectorAll(".tab").forEach(b => b.onclick = () => show(b.dataset.view));
-    document.getElementById("questList").addEventListener("click", e => {
-      const id = e.target.dataset.open;
-      if (!id) return;
-      activeId = id;
-      const q = active();
-      state.track = q.track;
-      save(); show("focus");
-    });
-    document.querySelectorAll("[data-mood]").forEach(b => b.onclick = () => { state.mood = b.dataset.mood; save(); });
-    document.querySelectorAll("[data-energy]").forEach(b => b.onclick = () => { state.energy = b.dataset.energy; save(); });
-    document.querySelectorAll("[data-track]").forEach(b => b.onclick = () => { state.track = b.dataset.track; if (playing) startAudio(); save(); });
-    document.querySelectorAll("[data-timer]").forEach(b => b.onclick = () => {
-      document.querySelectorAll("[data-timer]").forEach(x => x.classList.remove("active"));
-      b.classList.add("active");
-      remain = Number(b.dataset.timer) * 60;
-      clearInterval(timer);
-      timer = setInterval(() => {
-        remain -= 1;
-        const m = Math.floor(remain / 60), s = String(remain % 60).padStart(2, "0");
-        document.getElementById("timerLabel").textContent = remain > 0 ? m + ":" + s + " left. Stay with the first step." : "Timer done. Done enough counts.";
-        if (remain <= 0) clearInterval(timer);
-      }, 1000);
-    });
-    document.getElementById("startTiny").onclick = () => { if (active()) reward(active(), "tiny"); };
-    document.getElementById("clearQuest").onclick = () => { if (active()) reward(active(), "full"); };
-    document.getElementById("pauseQuest").onclick = () => { toast("Paused. The quest waits. No penalty."); show("today"); };
-    document.getElementById("frozenBtn").onclick = () => show("guide");
-    document.getElementById("addBtn").onclick = () => show("guide");
-    document.getElementById("guideStart").onclick = () => {
-      const q = state.quests.find(x => !x.done) || state.quests[0];
-      activeId = q.id; show("focus"); toast("Only the first step exists right now.");
-    };
-    document.getElementById("saveQuest").onclick = () => {
-      const title = document.getElementById("newTitle").value.trim();
-      const first = document.getElementById("newStep").value.trim();
-      if (!title || !first) return toast("Name it and give it a first step.");
-      state.quests.unshift({
-        id: "c" + Date.now(), title, cat: document.getElementById("newCat").value,
-        difficulty: "easy", minutes: 8, xp: 20, coins: 2, first, track: state.track, done: false, started: false
-      });
-      document.getElementById("newTitle").value = "";
-      document.getElementById("newStep").value = "";
-      toast("Quest added to today."); save(); show("today");
-    };
-    document.getElementById("lootGrid").addEventListener("click", e => {
-      const btn = e.target.closest("[data-redeem]");
-      if (!btn) return;
-      const card = CARDS.find(c => c.id === btn.dataset.redeem);
-      if (state.coins < card.cost) return toast("Need a few more clears.");
-      state.coins -= card.cost;
-      state.redemptions.unshift(card.name + " · demo code CLEAR-" + Math.random().toString(36).slice(2, 7).toUpperCase());
-      toast("Loot dropped. " + card.name);
-      save();
-    });
-    document.querySelectorAll("[data-connect]").forEach(b => b.onclick = () => {
-      state.connect = b.dataset.connect === "spotify" ? "Spotify" : "Apple Music";
-      toast(state.connect + " connected in demo mode"); save();
-    });
+function renderSound() {
+  return `${header()}
+    <section class="hero">
+      <p class="kicker">Soundtrack</p>
+      <h2>Lift you up or calm you down.</h2>
+      <p class="lede">Match the mix to your mood and the room you are in so starting gets easier.</p>
+      <div class="chips">
+        <button class="chip ${state.soundMode==="boost"?"on":""}" data-mode="boost">Boost</button>
+        <button class="chip ${state.soundMode==="calm"?"on":""}" data-mode="calm">Calm</button>
+      </div>
+    </section>
+    <section class="card">
+      <p class="kicker">Biome</p>
+      <div class="chips">
+        ${[["home","Home"],["kitchen","Kitchen"],["outside","Outside"],["night","Night"]].map(([id,l]) =>
+          `<button class="chip ${state.biome===id?"on":""}" data-b="${id}">${l}</button>`).join("")}
+      </div>
+    </section>
+    <section class="card">
+      <div class="player">
+        <div class="eq ${state.playing?"":"pause"}"><i></i><i></i><i></i></div>
+        <div style="flex:1"><b>${state.soundMode==="boost" ? "Launch mix" : "Soften mix"}</b><div class="meta" style="color:#d7cbe4">Generated pad · low volume</div></div>
+        <button class="btn" id="togglePlay">${state.playing?"Pause":"Play"}</button>
+      </div>
+      <p class="lede" style="margin-top:12px">Connect a library when you want your own songs.</p>
+      <div class="row">
+        <button class="btn ${state.connected.spotify?"primary":"ghost"}" id="spot">${state.connected.spotify?"Spotify on":"Connect Spotify"}</button>
+        <button class="btn ${state.connected.apple?"primary":"ghost"}" id="apple">${state.connected.apple?"Apple Music on":"Connect Apple Music"}</button>
+      </div>
+    </section>`;
+}
 
-    function viz() {
-      const el = document.getElementById("viz");
-      el.innerHTML = "";
-      for (let i = 0; i < 18; i++) el.appendChild(document.createElement("span"));
-    }
-    function stopAudio() {
-      if (audio) { audio.osc.forEach(o => o.stop()); audio.ctx.close(); audio = null; }
-      playing = false;
-    }
-    function startAudio() {
-      stopAudio();
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const master = ctx.createGain(); master.gain.value = 0.045; master.connect(ctx.destination);
-      const freqs = state.track === "boost" ? [196, 247, 294, 392] : [174, 220, 261, 329];
-      const osc = freqs.map((f, i) => {
-        const o = ctx.createOscillator(); const g = ctx.createGain();
-        o.type = state.track === "boost" ? "triangle" : "sine";
-        o.frequency.value = f;
-        g.gain.value = 0.2 + i * 0.05;
-        o.connect(g); g.connect(master); o.start();
-        return o;
-      });
-      audio = { ctx, osc }; playing = true; render();
-    }
-    document.getElementById("playBtn").onclick = () => {
-      if (playing) { stopAudio(); render(); }
-      else startAudio();
-    };
+function renderLoot() {
+  return `${header()}
+    <section class="hero">
+      <p class="kicker">Real loot</p>
+      <h2>Not badges. Gift cards.</h2>
+      <p class="lede">You have <b>${state.loot} loot coins</b>. Clears convert daily living into something you can actually spend.</p>
+    </section>
+    ${CARDS.map(c => `<div class="loot-card">
+      <div><b>${c.name}</b><div class="meta">${c.value} card · ${c.cost} coins</div></div>
+      <button class="btn ${state.loot>=c.cost?"primary":"ghost"}" data-buy="${c.id}">Redeem</button>
+    </div>`).join("")}
+    <p class="lede">Demo only. No real charge or fulfilment yet.</p>`;
+}
 
-    viz(); render();
-  </script>
+function renderYou() {
+  const toNext = 100 - (state.xp % 100);
+  return `${header()}
+    <section class="hero">
+      <p class="kicker">You</p>
+      <h2>${state.name || "Player"}'s campaign</h2>
+      <p class="lede">Streak ${state.streak} · ${state.history.length} clears · level ${Math.floor(state.xp/100)+1}</p>
+      <div class="progress"><b style="width:${state.xp%100}%"></b></div>
+      <p class="meta">${toNext} XP to next level</p>
+    </section>
+    <section class="card">
+      <p class="kicker">Cloud</p>
+      <p class="lede">Saved on this device. Cloud sync is a Plus feature in the full product.</p>
+    </section>
+    <section class="card">
+      <p class="kicker">Plans</p>
+      ${[["free","Free","Today, quests, local save"],["plus","Plus","Cloud, extra loot, AI breakdowns"],["studio","Studio","Household co-op and higher cards"]].map(([id,n,d]) =>
+        `<button class="quest" data-plan="${id}"><div class="badge">${id==="studio"?"✨":"✦"}</div><div><b>${n}</b><div class="meta">${d}</div></div><div class="xp">${state.plan===id?"On":"Pick"}</div></button>`).join("")}
+    </section>
+    <button class="btn ghost wide" id="reset">Reset this demo</button>`;
+}
+
+function bind(root) {
+  root.querySelectorAll("[data-e]").forEach(b => b.onclick = () => { state.energy = b.dataset.e; save(); render(); });
+  root.querySelectorAll("[data-open]").forEach(b => b.onclick = () => openQuest(b.dataset.open));
+  root.querySelectorAll("[data-start]").forEach(b => b.onclick = () => openQuest(b.dataset.start, true));
+  root.querySelectorAll("[data-two]").forEach(b => b.onclick = () => openQuest(b.dataset.two, true));
+  root.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { state.soundMode = b.dataset.mode; save(); render(); if (state.playing) startAudio(state.soundMode); });
+  root.querySelectorAll("[data-b]").forEach(b => b.onclick = () => { state.biome = b.dataset.b; save(); render(); });
+  root.querySelectorAll("[data-buy]").forEach(b => b.onclick = () => buy(b.dataset.buy));
+  root.querySelectorAll("[data-plan]").forEach(b => b.onclick = () => { state.plan = b.dataset.plan; save(); toast(state.plan + " selected"); render(); });
+  const play = root.querySelector("#togglePlay");
+  if (play) play.onclick = () => {
+    state.playing = !state.playing;
+    if (state.playing) startAudio(state.soundMode); else stopAudio();
+    save(); render();
+  };
+  const add = root.querySelector("#addDump");
+  if (add) add.onclick = () => {
+    const v = root.querySelector("#dump").value.trim();
+    if (!v) return toast("Park a thought in the box first.");
+    state.custom.unshift({ id: "c"+Date.now(), cat: state.zones[0] || "admin", icon: "✦", title: v, minutes: 8, xp: 22, loot: 8, energy: ["frozen","low","okay","charged"], first: "Open the thing or stand up. That is the whole first step.", steps: ["Do the smallest visible action.", "Stop after 8 minutes if you want."], boost: "Tiny Launch", calm: "Soft Start" });
+    save(); toast("Quest added. No guilt if it waits."); render();
+  };
+  const ds = root.querySelector("#doneStep");
+  if (ds) ds.onclick = nextStep;
+  const sk = root.querySelector("#skipStep");
+  if (sk) sk.onclick = nextStep;
+  const fr = root.querySelector("#froze");
+  if (fr) fr.onclick = () => { toast("Still here. Try the first step again, smaller."); state.step = 0; save(); render(); };
+  const pk = root.querySelector("#park");
+  if (pk) pk.onclick = () => { state.active = null; state.tab = "today"; save(); toast("Parked. That counts as taking care of you."); render(); };
+  const sp = root.querySelector("#spot");
+  if (sp) sp.onclick = () => { state.connected.spotify = !state.connected.spotify; save(); toast(state.connected.spotify ? "Spotify connected (demo)" : "Spotify off"); render(); };
+  const ap = root.querySelector("#apple");
+  if (ap) ap.onclick = () => { state.connected.apple = !state.connected.apple; save(); toast(state.connected.apple ? "Apple Music connected (demo)" : "Apple Music off"); render(); };
+  const rs = root.querySelector("#reset");
+  if (rs) rs.onclick = () => { stopAudio(); state = defaultState(); save(); boot(); };
+}
+
+function openQuest(id, play) {
+  const q = allQuests().find(x => x.id === id); if (!q) return;
+  state.active = id; state.step = 0; state.tab = "active";
+  if (play) { state.playing = true; startAudio(state.soundMode); }
+  save(); render();
+}
+function nextStep() {
+  const q = allQuests().find(x => x.id === state.active); if (!q) return;
+  const steps = [q.first].concat(q.steps || []);
+  if (state.step + 1 >= steps.length) return clearQuest(q);
+  state.step += 1; save(); render();
+}
+function clearQuest(q) {
+  state.xp += q.xp; state.loot += q.loot;
+  if (state.lastClear !== todayKey()) { state.streak += 1; state.lastClear = todayKey(); }
+  state.history.push(q.id); state.active = null; state.tab = "today"; state.playing = false; stopAudio();
+  save(); toast(`Cleared. +${q.xp} XP · +${q.loot} loot`); render();
+}
+function buy(id) {
+  const c = CARDS.find(x => x.id === id);
+  if (state.loot < c.cost) return toast("Need more clears for that card.");
+  state.loot -= c.cost; save(); toast(`${c.name} ${c.value} parked in loot (demo)`); render();
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const map = { today: renderToday, quests: renderQuests, sound: renderSound, loot: renderLoot, you: renderYou, active: renderActive };
+  app.innerHTML = (map[state.tab] || renderToday)();
+  bind(app);
+  dock();
+}
+function boot() {
+  document.getElementById("gate").classList.toggle("hidden", state.onboarded);
+  document.getElementById("app").classList.toggle("hidden", !state.onboarded);
+  document.getElementById("dock").classList.toggle("hidden", !state.onboarded);
+  if (!state.onboarded) renderGate(); else render();
+}
+boot();
+</script>
 </body>
 </html>
